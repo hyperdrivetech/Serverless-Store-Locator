@@ -34,17 +34,17 @@ exports.closest = async (request, response) => {
       .send({ "status:": 400, msg: "supported units are 'mi' or 'km'" });
   }
 
-  try {
+  // try {
     if (query_address && address) {
       res = await find_via_address(query_address);
     } else if (zip) {
       res = await find_via_zip(zip, units);
     }
-  } catch {
-    response
-      .status(400)
-      .send({ "status:": 400, msg: "no related address/zipcode found" });
-  }
+  // } catch {
+  //   response
+  //     .status(400)
+  //     .send({ "status:": 400, msg: "no related address/zipcode found" });
+  // }
 
   console.log(zip, address, units);
   response.status(200).send(res);
@@ -63,13 +63,19 @@ async function find_via_zip(zip, units) {
 
   console.log(distance)
   // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
-  let res = await db.select('*').from('stores').where(st.dwithin(knex.raw("geom::geography"), st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`), distance.toFixed(0)) ).limit(10)
+  let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`)
+  let res = await db.select('*').from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).limit(10)
   console.log(res[0])
-  return coord;
+  let dis = await db.select(`ST_Distance(${st.geomFromText(res[0]['geom'])}, ${origin}),*`).toString();
+  console.log('val', dis)
+  console.log(dis)
+  return res[0] ? res.length > 1 : [];
 }
 async function find_via_address(address) {
   let coord = await query_google(address)[0].geometry.location;
-  return coord;
+
+  let res = await db.select('*').from('stores').where(st.dwithin(knex.raw("geom::geography"), st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`), distance.toFixed(0)) ).limit(10)
+  return res[0] ? res.length > 1 : [];
 }
 
 function query_google(address) {
