@@ -38,9 +38,9 @@ exports.closest = async (request, response) => {
 
   // try {
     if (query_address && address) {
-      res = await find_via_address(query_address);
+      res = await find_via_address(query_address, units);
     } else if (zip) {
-      res = await find_via_zip(zip, units);
+      res = await find_via_address(zip, units);
     }
   // } catch {
   //   response
@@ -49,12 +49,12 @@ exports.closest = async (request, response) => {
   // }
 
   console.log(zip, address, units);
-  response.status(200).send(res);
+  return response.status(200).send({'status':200, 'msg': res});
 };
 
-async function find_via_zip(zip, units) {
-  let coord = await query_google(zip);
-  let distance
+async function find_via_address(address, units) {
+  let coord = await query_google(address);
+  let distance, dis;
   let d = coord[0].geometry.location
   console.log(coord);
   if (units  == 'km') {
@@ -67,15 +67,15 @@ async function find_via_zip(zip, units) {
   let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`)
   let res = await db.select(
     {
-    'distance': st.distance('geom', origin), ...STORE_ALIAS}).from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).limit(10)
-  dis = res.sort((a,b)=> a.distance ? a.distance > b.distance : b.distance)
-  return res[0] ? res.length > 1 : [];
-}
-async function find_via_address(address) {
-  let coord = await query_google(address)[0].geometry.location;
+    'distance': st.distance('geom', origin), ...STORE_ALIAS}).from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).orderBy('distance').limit(10)
+  // console.log(dis, dis[0] ? dis.length > 1 : [])
 
-  let res = await db.select('*').from('stores').where(st.dwithin(knex.raw("geom::geography"), st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`), distance.toFixed(0)) ).limit(10)
-  return res[0] ? res.length > 1 : [];
+  if (res.length > 1) {
+    res[0]['distance'] = res[0]['distance'] * 1000;
+    return res[0]
+  } else {
+    return []
+  } 
 }
 
 function query_google(address) {
@@ -93,10 +93,6 @@ function query_google(address) {
       return err;
     });
 }
-
-// exports.event = (event, callback) => {
-//   callback();
-// };
 
 var data = [
   {
