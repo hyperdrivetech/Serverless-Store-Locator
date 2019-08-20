@@ -9,6 +9,8 @@
   "author": "serverless.com",
   "license": "MIT",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.2.0",
     "serverless-google-cloudfunctions": "*"
   }
 }
