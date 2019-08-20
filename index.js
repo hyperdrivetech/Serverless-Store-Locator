@@ -6,15 +6,14 @@ const googleMapsClient = require("@google/maps").createClient({
 });
 
 exports.closest = async (request, response) => {
-  let res;
+  let res, query_address;
   const { zip, address, units } = request.query;
-  if (!zip && !address) {
-    return response
-      .status(400)
-      .send({
-        "status:": 400,
-        msg: "must include zip or address query param'"
-      });
+  query_address = address || "1600 Amphitheatre Parkway, Mountain View, CA";
+  if (!zip && !query_address) {
+    return response.status(400).send({
+      "status:": 400,
+      msg: "must include zip or address query param'"
+    });
   }
 
   const query_units = units || "mi";
@@ -24,27 +23,39 @@ exports.closest = async (request, response) => {
       .send({ "status:": 400, msg: "supported units are 'mi' or 'km'" });
   }
 
-  if (address) {
-    res = find_via_address(address);
-  } else if (zip) {
-    res = find_via_zip(zip, units);
+  try {
+    if (query_address && address) {
+      res = await find_via_address(query_address);
+    } else if (zip) {
+      res = await find_via_zip(zip, units);
+    }
+  } catch {
+    response
+      .status(400)
+      .send({ "status:": 400, msg: "no related address/zipcode found" });
   }
 
   console.log(zip, address, units);
   // response.status(200).send({})
-  res = await query_google();
+  // res = await query_google();
   response.status(200).send(res);
 };
 
-function find_via_zip(zip, units) {}
-function find_via_address(address) {}
+async function find_via_zip(zip, units) {
+  let coord = await query_google(zip);
+  console.log(coord);
+  return coord;
+}
+async function find_via_address(address) {
+  let coord = await query_google(address)[0].geometry.location;
+  return coord;
+}
 
-
-function query_google() {
-  return data;
+function query_google(address) {
+  // return data;
 
   return googleMapsClient
-    .geocode({ address: "1600 Amphitheatre Parkway, Mountain View, CA" })
+    .geocode({ address })
     .asPromise()
     .then(response => {
       console.log(response.json.results);
@@ -59,7 +70,6 @@ function query_google() {
 // exports.event = (event, callback) => {
 //   callback();
 // };
-
 
 var data = [
   {
