@@ -11,6 +11,8 @@ provider:
   #
   # the path to the credentials file needs to be absolute
   credentials: ~/.gcloud/dev-server-6d93fa739c4f.json
+  environment:
+    GOOGLE_MAPS_API_KEY: ${env:GOOGLE_MAPS_API_KEY}
 
 plugins:
   - serverless-google-cloudfunctions
