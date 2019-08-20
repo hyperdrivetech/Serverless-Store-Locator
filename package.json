@@ -16,6 +16,9 @@
   "dependencies": {
     "@google-cloud/functions-framework": "^1.2.1",
     "@google/maps": "^0.5.5",
-    "csv-parser": "^2.3.0"
+    "csv-parser": "^2.3.0",
+    "knex": "^0.19.2",
+    "knex-postgis": "^0.8.1",
+    "pg": "^7.12.1"
   }
 }
