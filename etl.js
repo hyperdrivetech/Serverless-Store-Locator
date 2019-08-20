@@ -1,6 +1,7 @@
 const csv = require("csv-parser");
 const fs = require("fs");
 const results = [];
+const wstream = fs.createWriteStream('knex/seed.sql');
 
 const knex = require("knex");
 const knexPostgis = require("knex-postgis");
@@ -14,6 +15,7 @@ const db = knex(config);
 // db.schema.dropTable('stores');
 db.schema.hasTable("stores").then(function(exists) {
   if (!exists) {
+    console.log('executing creation')
     return db.schema.createTable("stores", function(t) {
       t.increments("id").primary();
       t.string("store_name", 100);
@@ -26,49 +28,36 @@ db.schema.hasTable("stores").then(function(exists) {
       t.string("latitude", 100);
       t.string("longitude", 100);
       t.string("county", 100);
-    });
-    //   return fs.createReadStream('seed/store-locations.csv')
-    // return fs.createReadStream('seed/test.csv')
-    //   .pipe(csv({
-    //     mapHeaders: ({ header, index }) => header.toLowerCase()
-    //   }))
-    //   .on('data', (data) => results.push(data))
-    //   .on('end', () => {
-
-    //     db.insert({
-    //         geom: st.geomFromText('POINT(-71.064544 42.28787)', 4326)
-    //       }).into('points').toString();
-    //   });
+    })
   }
 });
 
 fs.createReadStream("seed/test.csv")
-  .pipe(
-    csv({
-      mapHeaders: ({ header, index }) => header.toLowerCase().replace(" ", "_")
+    .pipe(
+      csv({
+        mapHeaders: ({ header, index }) => header.toLowerCase().replace(" ", "_")
+      })
+    )
+    .on("data", row => {
+        // console.log(row)
+        let data = Object.assign({}, row);
+        //   data.geom = `POINT(${data.latitude}, ${data.longitude})`
+        data.geom = st.geomFromText(
+            `POINT(${data.latitude} ${data.longitude})`,
+            4326
+        );
+        results.push(row);
+        let sql = db
+        .insert(data)
+        .into("stores")
+        .toString()
+        wstream.write(sql+'\;\n')
+        return sql;
+    }).on("end",  () => {
+        console.log('This many results finished:', results.length)
+        wstream.end()
     })
-  )
-  .on("data", row => {
-    let data = Object.assign({}, row);
-    //   data.geom = `POINT(${data.latitude}, ${data.longitude})`
-    data.geom = st.geomFromText(
-      `POINT(${data.latitude} ${data.longitude})`,
-      4326
-    );
-    //   console.log(data.geom)
-    const sql = db
-      .insert(data)
-      .into("stores")
-      .toString();
-    console.log(sql);
-    results.push(row);
-  })
-  .on("end", () => {
-    // console.log(results)
-  })
-  .on("err", err => {
-    console.log(err);
-  });
+
 
 db.schema.hasTable("points").then(function(exists) {
   if (!exists) {
@@ -101,9 +90,9 @@ console.log(sql1);
 // console.log('res:', sql2);
 // select "id", ST_asText("geom") as "geom" from "points"
 
-x = async () => {
-  res = await db.select("id", st.asText("geom")).from("points");
-  console.log(res);
-};
+// x = async () => {
+//   res = await db.select("id", st.asText("geom")).from("points");
+//   console.log(res);
+// };
 
-x();
+// x();

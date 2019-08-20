@@ -16,10 +16,6 @@ module.exports = {
       database: 'postgres',
       user:     'postgres',
       password: 'mysecretpassword'
-    },
-    pool: {
-      min: 2,
-      max: 10
     }
   },
 
