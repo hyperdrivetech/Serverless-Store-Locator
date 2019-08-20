@@ -39,6 +39,28 @@ exports.closest = async (request, response) => {
 function find_via_zip(zip, units) {}
 function find_via_address(address) {}
 
+
+function query_google() {
+  return data;
+
+  return googleMapsClient
+    .geocode({ address: "1600 Amphitheatre Parkway, Mountain View, CA" })
+    .asPromise()
+    .then(response => {
+      console.log(response.json.results);
+      return response.json.results;
+    })
+    .catch(err => {
+      console.log(err);
+      return err;
+    });
+}
+
+// exports.event = (event, callback) => {
+//   callback();
+// };
+
+
 var data = [
   {
     address_components: [
@@ -87,23 +109,3 @@ var data = [
     types: ["street_address"]
   }
 ];
-
-function query_google() {
-  return data;
-
-  return googleMapsClient
-    .geocode({ address: "1600 Amphitheatre Parkway, Mountain View, CA" })
-    .asPromise()
-    .then(response => {
-      console.log(response.json.results);
-      return response.json.results;
-    })
-    .catch(err => {
-      console.log(err);
-      return err;
-    });
-}
-
-// exports.event = (event, callback) => {
-//   callback();
-// };
