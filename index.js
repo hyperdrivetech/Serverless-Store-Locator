@@ -5,6 +5,15 @@ const googleMapsClient = require("@google/maps").createClient({
   Promise: Promise
 });
 
+const knex = require("knex");
+const knexPostgis = require("knex-postgis");
+
+const environment = process.env.ENVIRONMENT || "development";
+const config = require("./knexfile.js")[environment];
+
+const db = knex(config);
+const st = knexPostgis(db);
+
 exports.closest = async (request, response) => {
   let res, query_address;
   const { zip, address, units } = request.query;
@@ -43,7 +52,9 @@ exports.closest = async (request, response) => {
 
 async function find_via_zip(zip, units) {
   let coord = await query_google(zip);
+  let d = coord[0].geometry.location
   console.log(coord);
+  console.log(db.select('*').from('stores').orderBy(st.distance('geom', `SRID=4326;POINT(${d.lat} ${d.lng})`)).limit(10).toString());
   return coord;
 }
 async function find_via_address(address) {
@@ -52,7 +63,7 @@ async function find_via_address(address) {
 }
 
 function query_google(address) {
-  // return data;
+  return data;
 
   return googleMapsClient
     .geocode({ address })
