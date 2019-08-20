@@ -6,7 +6,18 @@ const googleMapsClient = require("@google/maps").createClient({
 });
 
 const DISTANCE_RADIUS = 10; // Described in 10 Miles or 10 Km
-const STORE_ATTRIBUTES = ["address", "city", "county", "geom", "latitude", "longitude", "state", "store_location", "store_name", "zip_code"]
+const STORE_ATTRIBUTES = [
+  "address",
+  "city",
+  "county",
+  "geom",
+  "latitude",
+  "longitude",
+  "state",
+  "store_location",
+  "store_name",
+  "zip_code"
+];
 const STORE_ALIAS = Object.assign(...STORE_ATTRIBUTES.map(k => ({ [k]: k })));
 
 const knex = require("knex");
@@ -36,50 +47,55 @@ exports.closest = async (request, response) => {
       .send({ "status:": 400, msg: "supported units are 'mi' or 'km'" });
   }
 
-  // try {
+  try {
     if (query_address && address) {
       res = await find_via_address(query_address, units);
     } else if (zip) {
       res = await find_via_address(zip, units);
     }
-  // } catch {
-  //   response
-  //     .status(400)
-  //     .send({ "status:": 400, msg: "no related address/zipcode found" });
-  // }
+  } catch {
+    response
+      .status(400)
+      .send({ "status:": 400, msg: "no related address/zipcode found" });
+  }
 
   console.log(zip, address, units);
-  return response.status(200).send({'status':200, 'msg': res});
+  return response.status(200).send({ status: 200, msg: res });
 };
 
 async function find_via_address(address, units) {
   let coord = await query_google(address);
   let distance, dis;
-  let d = coord[0].geometry.location
+  let d = coord[0].geometry.location;
   console.log(coord);
-  if (units  == 'km') {
+  if (units == "km") {
     distance = 1000 * DISTANCE_RADIUS;
   } else {
-    distance = 1000* 1.60934 * DISTANCE_RADIUS;
+    distance = 1000 * 1.60934 * DISTANCE_RADIUS;
   }
 
   // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
-  let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`)
-  let res = await db.select(
-    {
-    'distance': st.distance('geom', origin), ...STORE_ALIAS}).from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).orderBy('distance').limit(10)
+  let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`);
+  let res = await db
+    .select({
+      distance: st.distance("geom", origin),
+      ...STORE_ALIAS
+    })
+    .from("stores")
+    .where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)))
+    .orderBy("distance")
+    .limit(10);
   // console.log(dis, dis[0] ? dis.length > 1 : [])
 
   if (res.length > 1) {
-    res[0]['distance'] = res[0]['distance'] * 1000;
-    return res[0]
+    res[0]["distance"] = res[0]["distance"] * 1000;
+    return res[0];
   } else {
-    return []
-  } 
+    return [];
+  }
 }
 
 function query_google(address) {
-  return data;
 
   return googleMapsClient
     .geocode({ address })
