@@ -17,6 +17,7 @@ const environment = process.env.ENVIRONMENT || "development";
 const config = require("./knexfile.js")[environment];
 
 const db = knex(config);
+const st = knexPostgis(db);
 
 // Check if table exists if not create
 db.schema.dropTable("stores");
@@ -39,7 +40,7 @@ db.schema.hasTable("stores").then(function(exists) {
   }
 });
 
-fs.createReadStream("seed/test.csv")
+fs.createReadStream("seed/store-locations.csv")
   .pipe(
     csv({
       mapHeaders: ({ header, index }) => header.toLowerCase().replace(" ", "_")
