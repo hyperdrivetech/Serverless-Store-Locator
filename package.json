@@ -12,5 +12,8 @@
     "chai": "^4.2.0",
     "mocha": "^6.2.0",
     "serverless-google-cloudfunctions": "*"
+  },
+  "dependencies": {
+    "csv-parser": "^2.3.0"
   }
 }
