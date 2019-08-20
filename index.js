@@ -6,6 +6,8 @@ const googleMapsClient = require("@google/maps").createClient({
 });
 
 const DISTANCE_RADIUS = 10; // Described in 10 Miles or 10 Km
+const STORE_ATTRIBUTES = ["address", "city", "county", "geom", "latitude", "longitude", "state", "store_location", "store_name", "zip_code"]
+const STORE_ALIAS = Object.assign(...STORE_ATTRIBUTES.map(k => ({ [k]: k })));
 
 const knex = require("knex");
 const knexPostgis = require("knex-postgis");
@@ -61,14 +63,12 @@ async function find_via_zip(zip, units) {
     distance = 1000* 1.60934 * DISTANCE_RADIUS;
   }
 
-  console.log(distance)
   // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
   let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`)
-  let res = await db.select('*').from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).limit(10)
-  console.log(res[0])
-  let dis = await db.select(`ST_Distance(${st.geomFromText(res[0]['geom'])}, ${origin}),*`).toString();
-  console.log('val', dis)
-  console.log(dis)
+  let res = await db.select(
+    {
+    'distance': st.distance('geom', origin), ...STORE_ALIAS}).from('stores').where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)) ).limit(10)
+  dis = res.sort((a,b)=> a.distance ? a.distance > b.distance : b.distance)
   return res[0] ? res.length > 1 : [];
 }
 async function find_via_address(address) {
