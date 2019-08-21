@@ -94,7 +94,6 @@ async function find_via_address(address, units) {
 }
 
 function query_google(address) {
-
   return googleMapsClient
     .geocode({ address })
     .asPromise()
