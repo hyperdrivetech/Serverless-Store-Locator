@@ -54,7 +54,7 @@ exports.closest = async (request, response) => {
       res = await find_via_address(zip, units);
     }
   } catch {
-    response
+    return response
       .status(400)
       .send({ "status:": 400, msg: "no related address/zipcode found" });
   }
@@ -66,7 +66,6 @@ async function find_via_address(address, units) {
   let coord = await query_google(address);
   let distance, dis;
   let d = coord[0].geometry.location;
-  console.log(coord);
   if (units == "km") {
     distance = 1000 * DISTANCE_RADIUS;
   } else {
