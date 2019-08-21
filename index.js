@@ -44,7 +44,7 @@ exports.closest = async (request, response) => {
   if (!query_units && zip) {
     return response
       .status(400)
-      .send({ "status:": 400, msg: "supported units are 'mi' or 'km'" });
+      .send({ "status:": 400, "msg": "supported units are 'mi' or 'km'" });
   }
 
   try {
@@ -53,10 +53,10 @@ exports.closest = async (request, response) => {
     } else if (zip) {
       res = await find_via_address(zip, units);
     }
-  } catch {
+  } catch(e) {
     return response
       .status(400)
-      .send({ "status:": 400, msg: "no related address/zipcode found" });
+      .send({ "status:": 400, msg: string(e) });
   }
 
   return response.status(200).send({ status: 200, msg: res });
