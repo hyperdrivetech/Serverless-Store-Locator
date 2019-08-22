@@ -134,7 +134,7 @@ describe('Check for Addresses/ZipCodes', () => {
   //     .yields(null, null, JSON.stringify({query: {"address": "1600 Amitheatre"}}));
   //   done();
   // });
-  it.skip('should error out validation', (done) => {
+  it.skip('Should error out validation', (done) => {
     request.get(`${BASE}/closest?units=km`, (err, res, body) => {
       console.log(err)
       res.statusCode.should.equal(200);
@@ -158,7 +158,7 @@ describe('Check for Addresses/ZipCodes', () => {
       done();
     });
   });
-  it.skip('Check for address', (done) => {
+  it.skip('Check for Address', (done) => {
     request.get(`${base}/closest?address=100 Cat Street`, (err, res, body) => {
       res.statusCode.should.equal(404);
       res.headers['content-type'].should.contain('application/json');
