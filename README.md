@@ -53,6 +53,12 @@ Note:
   addresses should be encoded for the URI
 ```
 
+# Example Usage
+- https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse%20Bakeshop%20&%20Cafe&units=km
+- https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse
+- https://us-central1-stan-zheng.cloudfunctions.net/closest?zip=10002
+- https://us-central1-stan-zheng.cloudfunctions.net/closest?zip=10002&units=km
+
 
 NOTES/TODOS 
 
@@ -63,7 +69,7 @@ NOTES/TODOS
   - The address nearby increases distance until it finds it in the size that resembles it.
   - User has ability to deploy a postgres instance with postgis and load the knex/seed.sql dataset after initializing the repo
 
-
+-
 
 Resources
 - http://knexjs.org/

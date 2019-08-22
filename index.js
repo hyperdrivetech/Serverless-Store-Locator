@@ -86,10 +86,10 @@ async function find_via_address(address, units) {
     .where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(4)))
     .orderBy("distance")
     .limit(10);
-
+    console.log(res)
   }
 
-  if (res.length > 1) {
+  if (res.length > 0) {
     res[0]["distance"] = `${(Number(res[0]["distance"])/multiplier).toFixed(4)} ${units}`;
     return res[0];
   } else {
