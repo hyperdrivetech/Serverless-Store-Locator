@@ -62,6 +62,7 @@ Note:
 
 
 ``` json
+# https://us-central1-stan-zheng.cloudfunctions.net/closest?zip=10002
 {
   "status": 200,
   "msg": {
@@ -80,12 +81,18 @@ Note:
 }
 ```
 
-## FAIL 403
+## FAIL 400
 https://us-central1-stan-zheng.cloudfunctions.net/closest?units=km
 https://us-central1-stan-zheng.cloudfunctions.net/closest
 https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse%20Bakeshop%20&%20Cafe&units=inches
 
-
+```
+# http://localhost:8080/closest?zip=10002&units=cat
+{
+"status:": 400,
+"msg": "supported units are 'mi' or 'km'"
+}
+```
 NOTES/TODOS 
 
 - solution pings google geocode API and geocodes an address or zip code. 
