@@ -101,8 +101,11 @@ NOTES/TODOS
   - Google Address Geocoding can accept any malformed input and return a pseudo address
   - The address nearby increases distance until it finds it in the size that resembles it.
   - User has ability to deploy a postgres instance with postgis and load the knex/seed.sql dataset after initializing the repo
+- the examples above are for tests, sinon and mocking out the application in testing was superfulous. Would require mocking out DB connector and Google Geocoding. Everything is highly cohesive, these tests wouldn't be helpful. Would add a health check likely for the endpoint that would test connectivity pooled.
+- The API Quota could be hit 
+- DB is not exposed to the internet so its fine to commit the fake dumb password that I own. 
+- All of the functions are in one file to make it easier to deploy.
 
--
 
 Resources
 - http://knexjs.org/
@@ -113,6 +116,7 @@ Resources
 - https://gis.stackexchange.com/questions/76967/what-is-the-unit-used-in-st-distance
 - https://stackoverflow.com/questions/25861052/postgis-error-parse-error-invalid-geometry/46467909
 - https://github.com/tgriesser/knex/issues/1244
+- https://cloud.google.com/vpc/docs/configure-serverless-vpc-access
 
 # LICENSE
 APACHE
