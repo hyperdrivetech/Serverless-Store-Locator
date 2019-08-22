@@ -2,7 +2,7 @@
 
 -- DROP TABLE public.stores;
 
-CREATE TABLE public.stores (
+CREATE TABLE stores (
 	id serial NOT NULL,
 	store_name varchar(100) NULL,
 	store_location varchar(100) NULL,
