@@ -38,7 +38,7 @@ exports.closest = async (request, response) => {
     });
   }
 
-  if (!units === "mi" && !(units === 'km')) {
+  if (!['km', 'mi'].includes(units)) {
     return response
       .status(400)
       .send({ "status:": 400, "msg": "supported units are 'mi' or 'km'" });
