@@ -113,3 +113,6 @@ Resources
 - https://gis.stackexchange.com/questions/76967/what-is-the-unit-used-in-st-distance
 - https://stackoverflow.com/questions/25861052/postgis-error-parse-error-invalid-geometry/46467909
 - https://github.com/tgriesser/knex/issues/1244
+
+# LICENSE
+APACHE
