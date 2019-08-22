@@ -24,8 +24,6 @@ sinon.stub(knex, 'raw').resolves({});
 
 var closest = require('./index');
 
-
-
 var data = [
     {
       address_components: [
@@ -87,7 +85,6 @@ it('should return false if invalid', function(){
       isValid.should.equal(false);
 });
 
-
 /// Validate Google / Geocoding
 describe('Check Geocoding', () => {
   before(function(done){
@@ -97,6 +94,24 @@ describe('Check Geocoding', () => {
     done();
   });
   it.skip('Validate Units', (done) => {
+    request.get(`${base}/closest?address=10002&units=CAT`, (err, res, body) => {
+      res.statusCode.should.equal(404);
+      res.headers['content-type'].should.contain('application/json');
+      body = JSON.parse(body);
+      // body.status.should.eql('error');
+      body.message.should.eql('CHECK UNITS');
+      done();
+    });
+  });
+  afterEach(() => {
+    request.get.restore();
+  });
+});
+
+
+/// Check Database testing
+describe('Check Geocoding', () => {
+  it.skip('Test Postgres', (done) => {
     request.get(`${base}/closest?address=10002&units=CAT`, (err, res, body) => {
       res.statusCode.should.equal(404);
       res.headers['content-type'].should.contain('application/json');
