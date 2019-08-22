@@ -56,7 +56,6 @@ Note:
 
 NOTES/TODOS 
 
-# Leaving APT 300
 - solution pings google geocode API and geocodes an address or zip code. 
 - Address then compares against the relation postgres database with postgis installed.
 - Assumptions 

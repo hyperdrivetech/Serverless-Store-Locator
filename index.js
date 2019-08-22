@@ -22,8 +22,8 @@ const STORE_ALIAS = Object.assign(...STORE_ATTRIBUTES.map(k => ({ [k]: k })));
 const knex = require("knex");
 const knexPostgis = require("knex-postgis");
 
-const environment = process.env.ENVIRONMENT || "development";
-const config = require("./knexfile.js")[environment];
+const env = process.env.NODE_ENV || "development";
+const config = require("./knexfile.js")[env];
 
 const db = knex(config);
 const st = knexPostgis(db);
