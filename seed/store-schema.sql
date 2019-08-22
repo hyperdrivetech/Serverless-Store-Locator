@@ -1,6 +1,6 @@
 -- Drop table
 
--- DROP TABLE public.stores;
+-- DROP TABLE stores;
 CREATE EXTENSION postgis;
 CREATE TABLE stores (
 	id serial NOT NULL,
