@@ -4,7 +4,7 @@ const googleMapsClient = require("@google/maps").createClient({
   key: process.env["GOOGLE_MAPS_API_KEY"],
   Promise: Promise
 });
-const MAGIC_NUMBER = 10^1000;
+const MAGIC_NUMBER = 10 ^ 1000;
 const STORE_ATTRIBUTES = [
   "address",
   "city",
@@ -38,24 +38,22 @@ exports.closest = async (request, response) => {
     });
   }
   // validates type if its km or mi and then if units are not set, allow them to be miles (mi)
-  let default_units = units || 'mi'
-  if (!['km', 'mi'].includes(default_units)){
+  let default_units = units || "mi";
+  if (!["km", "mi"].includes(default_units)) {
     return response
       .status(400)
-      .send({ "status:": 400, "msg": "supported units are 'mi' or 'km'" });
-  } 
+      .send({ "status:": 400, msg: "supported units are 'mi' or 'km'" });
+  }
 
-  set_units = units || 'mi';
+  set_units = units || "mi";
   try {
     if (address) {
       res = await find_via_address(address, default_units || set_units);
     } else if (zip) {
       res = await find_via_address(zip, default_units || set_units);
     }
-  } catch(e) {
-    return response
-      .status(400)
-      .send({ "status:": 400, msg: String(e) });
+  } catch (e) {
+    return response.status(400).send({ "status:": 400, msg: String(e) });
   }
 
   return response.status(200).send({ status: 200, msg: res });
@@ -63,7 +61,9 @@ exports.closest = async (request, response) => {
 
 async function find_via_address(address, units) {
   let coord = await query_google(address);
-  let distance, multiplier = 1, res = [];
+  let distance,
+    multiplier = 1,
+    res = [];
   let d = coord[0].geometry.location;
 
   // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
@@ -72,25 +72,28 @@ async function find_via_address(address, units) {
   if (units == "km") {
     distance = 1000 * MAGIC_NUMBER;
   } else {
-    distance = 1000 * .62 * MAGIC_NUMBER;; // KM to Mile Ratio
+    distance = 1000 * 0.62 * MAGIC_NUMBER; // KM to Mile Ratio
   }
 
-  while (res.length === 0 ) {
-  distance = distance * multiplier;
-  multiplier *= 10;
-  res = await db
-    .select({
-      distance: st.distance("geom", origin),
-      ...STORE_ALIAS
-    })
-    .from("stores")
-    .where(st.dwithin(knex.raw("geom::geography"), origin, distance))
-    .orderBy("distance")
-    .limit(10);
+  while (res.length === 0) {
+    distance = distance * multiplier;
+    multiplier *= 10;
+    res = await db
+      .select({
+        distance: st.distance("geom", origin),
+        ...STORE_ALIAS
+      })
+      .from("stores")
+      .where(st.dwithin(knex.raw("geom::geography"), origin, distance))
+      .orderBy("distance")
+      .limit(10);
   }
 
   if (res.length > 0) {
-    res[0]["distance"] = `${(Number(res[0]["distance"])*MAGIC_NUMBER/multiplier).toFixed(4)} ${units}`;
+    res[0]["distance"] = `${(
+      (Number(res[0]["distance"]) * MAGIC_NUMBER) /
+      multiplier
+    ).toFixed(4)} ${units}`;
     return res[0];
   } else {
     return [];
