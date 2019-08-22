@@ -30,33 +30,31 @@ const db = knex(config);
 const st = knexPostgis(db);
 
 exports.closest = async (request, response) => {
-  let res, query_address;
+  let res;
   const { zip, address, units } = request.query;
-  query_address = address || "1600 Amphitheatre Parkway, Mountain View, CA";
-  if (!zip && !query_address) {
+  if (!zip && !address) {
     return response.status(400).send({
       "status:": 400,
       msg: "must include zip or address query param'"
     });
   }
 
-  const query_units = units || "mi";
-  if (!query_units && zip) {
+  if (!units === "mi" && !(units === 'km')) {
     return response
       .status(400)
       .send({ "status:": 400, "msg": "supported units are 'mi' or 'km'" });
   }
 
   try {
-    if (query_address && address) {
-      res = await find_via_address(query_address, units);
+    if (address) {
+      res = await find_via_address(address, units);
     } else if (zip) {
       res = await find_via_address(zip, units);
     }
   } catch(e) {
     return response
       .status(400)
-      .send({ "status:": 400, msg: string(e) });
+      .send({ "status:": 400, msg: String(e) });
   }
 
   return response.status(200).send({ status: 200, msg: res });
@@ -64,17 +62,20 @@ exports.closest = async (request, response) => {
 
 async function find_via_address(address, units) {
   let coord = await query_google(address);
-  let distance, dis;
+  let distance, res = [];
   let d = coord[0].geometry.location;
+
+  // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
+  let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`);
+
   if (units == "km") {
     distance = 1000 * DISTANCE_RADIUS;
   } else {
     distance = 1000 * 1.60934 * DISTANCE_RADIUS;
   }
 
-  // select * from "stores" where ST_DWithin(geom::geography, ST_geomFromText('SRID=4326;POINT(lat lng)'), 1609*10) limit 10
-  let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`);
-  let res = await db
+  while (res.length === 0 ) {
+  res = await db
     .select({
       distance: st.distance("geom", origin),
       ...STORE_ALIAS
@@ -83,9 +84,11 @@ async function find_via_address(address, units) {
     .where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(0)))
     .orderBy("distance")
     .limit(10);
+    distance = distance * 10;
+  }
 
   if (res.length > 1) {
-    res[0]["distance"] = res[0]["distance"] * 1000;
+    res[0]["distance"] = `${res[0]["distance"] * 1000} units`;
     return res[0];
   } else {
     return [];
