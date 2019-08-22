@@ -4,7 +4,7 @@ const googleMapsClient = require("@google/maps").createClient({
   key: process.env["GOOGLE_MAPS_API_KEY"],
   Promise: Promise
 });
-
+const MAGIC_NUMBER = 10^1000;
 const STORE_ATTRIBUTES = [
   "address",
   "city",
@@ -37,8 +37,9 @@ exports.closest = async (request, response) => {
       msg: "must include zip or address query param'"
     });
   }
-
-  if (!['km', 'mi'].includes(units)) {
+  // validates type if its km or mi and then if units are not set, allow them to be miles (mi)
+  let default_units = units || 'mi'
+  if (!['km', 'mi'].includes(default_units)){
     return response
       .status(400)
       .send({ "status:": 400, "msg": "supported units are 'mi' or 'km'" });
@@ -47,9 +48,9 @@ exports.closest = async (request, response) => {
   set_units = units || 'mi';
   try {
     if (address) {
-      res = await find_via_address(address, set_units);
+      res = await find_via_address(address, default_units || set_units);
     } else if (zip) {
-      res = await find_via_address(zip, set_units);
+      res = await find_via_address(zip, default_units || set_units);
     }
   } catch(e) {
     return response
@@ -69,9 +70,9 @@ async function find_via_address(address, units) {
   let origin = st.geomFromText(`SRID=4326;POINT(${d.lat} ${d.lng})`);
 
   if (units == "km") {
-    distance = 1000;
+    distance = 1000 * MAGIC_NUMBER;
   } else {
-    distance = 1000 * .62; // KM to Mile Ratio
+    distance = 1000 * .62 * MAGIC_NUMBER;; // KM to Mile Ratio
   }
 
   while (res.length === 0 ) {
@@ -83,14 +84,13 @@ async function find_via_address(address, units) {
       ...STORE_ALIAS
     })
     .from("stores")
-    .where(st.dwithin(knex.raw("geom::geography"), origin, distance.toFixed(4)))
+    .where(st.dwithin(knex.raw("geom::geography"), origin, distance))
     .orderBy("distance")
     .limit(10);
-    console.log(res)
   }
 
   if (res.length > 0) {
-    res[0]["distance"] = `${(Number(res[0]["distance"])/multiplier).toFixed(4)} ${units}`;
+    res[0]["distance"] = `${(Number(res[0]["distance"])*MAGIC_NUMBER/multiplier).toFixed(4)} ${units}`;
     return res[0];
   } else {
     return [];

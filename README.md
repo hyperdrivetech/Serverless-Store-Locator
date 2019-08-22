@@ -54,10 +54,36 @@ Note:
 ```
 
 # Example Usage
+## SUCCESS 200
 - https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse%20Bakeshop%20&%20Cafe&units=km
 - https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse
 - https://us-central1-stan-zheng.cloudfunctions.net/closest?zip=10002
 - https://us-central1-stan-zheng.cloudfunctions.net/closest?zip=10002&units=km
+
+
+``` json
+{
+  "status": 200,
+  "msg": {
+  "distance": "2.5075 km",
+  "address": "255 Greenwich St",
+  "city": "New York",
+  "county": "New York County",
+  "geom": "0101000020E61000005C85DE2C6F5B4440614C9FC2B68052C0",
+  "latitude": "40.7143303",
+  "longitude": "-74.0111548",
+  "state": "NY",
+  "store_location": "Greenwich & Murray",
+  "store_name": "Tribeca",
+  "zip_code": "10007-2377"
+  }
+}
+```
+
+## FAIL 403
+https://us-central1-stan-zheng.cloudfunctions.net/closest?units=km
+https://us-central1-stan-zheng.cloudfunctions.net/closest
+https://us-central1-stan-zheng.cloudfunctions.net/closest?address=Aromas%20Coffeehouse%20Bakeshop%20&%20Cafe&units=inches
 
 
 NOTES/TODOS 
