@@ -12,6 +12,12 @@ var fakeGoogleAPI = { createClient: (key )=> {
   }
 }};
 
+if (process.env == 'production') {
+  let BASE = "https://us-central1-stan-zheng.cloudfunctions.net/closest";
+} else {
+  let BASE = "http://localhost:8080/"
+}
+
 var spy = sinon.spy();
 var mock = sinon.mock(fakeGoogleAPI);
 sinon.stub(knex, 'raw').resolves({});
@@ -81,35 +87,40 @@ it('should return false if invalid', function(){
       isValid.should.equal(false);
 });
 
-describe('stubbed request', () => {
+
+/// Validate Google / Geocoding
+describe('Check Geocoding', () => {
   before(function(done){
     sinon
       .stub(request, 'get')
       .yields(null, null, JSON.stringify({query: {"address": "1600 Amitheatre"}}));
     done();
   });
- it('should respond with a single movie', (done) => {
-    request.get(`localhost:8080/zip?`, (err, res, body) => {
-      console.log(err)
-      res.statusCode.should.equal(200);
+  it.skip('Validate Units', (done) => {
+    request.get(`${base}/closest?address=10002&units=CAT`, (err, res, body) => {
+      res.statusCode.should.equal(404);
       res.headers['content-type'].should.contain('application/json');
       body = JSON.parse(body);
-      body.status.should.eql('success');
-      body.data[0].should.include.keys(
-        'id', 'name', 'genre', 'rating', 'explicit'
-      );
-      body.data[0].name.should.eql('The Land Before Time');
+      // body.status.should.eql('error');
+      body.message.should.eql('CHECK UNITS');
       done();
     });
-  })
+  });
   afterEach(() => {
     request.get.restore();
   });
-})
+});
 
-describe('GET /api/v1/movies/:id', () => {
-  it('should respond with a single movie', (done) => {
-    request.get(`localhost:8080 /zip?`, (err, res, body) => {
+
+describe('Check for Addresses/ZipCodes', () => {
+  // before(function(done){
+  //   sinon
+  //     .stub(request, 'get')
+  //     .yields(null, null, JSON.stringify({query: {"address": "1600 Amitheatre"}}));
+  //   done();
+  // });
+  it.skip('should error out validation', (done) => {
+    request.get(`${BASE}/closest?units=km`, (err, res, body) => {
       console.log(err)
       res.statusCode.should.equal(200);
       res.headers['content-type'].should.contain('application/json');
@@ -118,18 +129,31 @@ describe('GET /api/v1/movies/:id', () => {
       body.data[0].should.include.keys(
         'id', 'name', 'genre', 'rating', 'explicit'
       );
-      body.data[0].name.should.eql('The Land Before Time');
+      body.data[0].name.should.eql('Some Address');
       done();
     });
   });
-  it('should throw an error if the movie does not exist', (done) => {
-    request.get(`${base}/api/v1/movies/999`, (err, res, body) => {
+  it.skip('Check for Zipcode', (done) => {
+    request.get(`${base}/closest?address=10002&units=km`, (err, res, body) => {
       res.statusCode.should.equal(404);
       res.headers['content-type'].should.contain('application/json');
       body = JSON.parse(body);
       body.status.should.eql('error');
-      body.message.should.eql('That movie does not exist.');
+      body.message.should.eql('Some Zip');
       done();
     });
+  });
+  it.skip('Check for address', (done) => {
+    request.get(`${base}/closest?address=100 Cat Street`, (err, res, body) => {
+      res.statusCode.should.equal(404);
+      res.headers['content-type'].should.contain('application/json');
+      body = JSON.parse(body);
+      // body.status.should.eql('error');
+      body.message.should.eql('CHECK UNITS');
+      done();
+    });
+  });
+  afterEach(() => {
+    request.get.restore();
   });
 });
