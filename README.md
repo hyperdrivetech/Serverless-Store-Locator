@@ -1,28 +1,30 @@
-# Postgres  + Postgis + Node + Serverless  example 
+# Turbo Pancake
 
-# local
-docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis -p 5432:5432
 
-# postgres
-# O6zEAlA7cDAcLmO0
-gcloud sql connect stores --user=postgres
-CREATE EXTENSION postgis;
-
+This is a tabular dataset of the locations of every store of a major national retail chain. Basic implementation to load and run postgis queries using node and severless.
+The implementation can query the dataset and find the nearest store to a provided address or zip code
 
 # setup gcloud
 [setup serverless](https://serverless.com/framework/docs/providers/google/guide/credentials#get-credentials--assign-roles)
 
 
-
 # local running 
-`npm start`
+``` bash
+npm install
+npm start
+```
 
 # local development
-`npm install -g nodemon`
-`nodemon --exec  functions-framework --target=closest`
+``` bash
+npm install -g nodemon
+docker run --name some-postgis -e POSTGRES_PASSWORD=mysecretpassword -d mdillon/postgis -p 5432:5432
+nodemon --exec  functions-framework --target=closest # allows 
+```
 
+# local testing
+`npm run test` 
 
-# Data 
+# Data Model
 Store Name,Store Location,Address,City,State,Zip Code,Latitude,Longitude,County
 Crystal,SWC Broadway & Bass Lake Rd,5537 W Broadway Ave,Crystal,MN,55428-3507,45.0521539,-93.364854,Hennepin County
 Duluth,SEC Hwy 53 & Burning Tree Rd,1902 Miller Trunk Hwy,Duluth,MN,55811-1810,46.808614,-92.1681479,St Louis County
@@ -33,9 +35,11 @@ Find Store
   store-locations.csv, return the matching store address, as well as
   the distance to that store in JSON format
 
+# Example SQL
 `select * from "stores" where ST_DWithin("geom::geography", ST_geomFromText('SRID=4326;POINT(37.4260076 -122.0911298)'), '1609') limit 10;`
 
-Usage:
+
+#  API DOCS
   {server}/closest?zip=<zip>
   {server}/closest?address=<address>
   {server}/closest?zip=<zip>&units=<(mi|km)>
@@ -48,6 +52,19 @@ Options:
 Note:
   addresses should be encoded for the URI
 ```
+
+
+NOTES/TODOS 
+
+# Leaving APT 300
+- solution pings google geocode API and geocodes an address or zip code. 
+- Address then compares against the relation postgres database with postgis installed.
+- Assumptions 
+  - Google Address Geocoding can accept any malformed input and return a pseudo address
+  - The address nearby increases distance until it finds it in the size that resembles it.
+  - User has ability to deploy a postgres instance with postgis and load the knex/seed.sql dataset after initializing the repo
+
+
 
 Resources
 - http://knexjs.org/
