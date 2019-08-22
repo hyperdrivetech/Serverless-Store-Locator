@@ -13,6 +13,7 @@ provider:
   credentials: ~/.gcloud/dev-server-6d93fa739c4f.json
   environment:
     GOOGLE_MAPS_API_KEY: ${env:GOOGLE_MAPS_API_KEY}
+    NODE_ENV: ${env:NODE_ENV}
 
 plugins:
   - serverless-google-cloudfunctions
