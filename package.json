@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "functions-framework --target=closest"
+    "start": "functions-framework --target=closest",
+    "test": "mocha *.spec.js --reporter spec"
   },
   "author": "serverless.com",
   "license": "MIT",
@@ -19,6 +20,8 @@
     "csv-parser": "^2.3.0",
     "knex": "^0.19.2",
     "knex-postgis": "^0.8.1",
-    "pg": "^7.12.1"
+    "pg": "^7.12.1",
+    "request": "^2.88.0",
+    "sinon": "^7.4.1"
   }
 }

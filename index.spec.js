@@ -1,7 +1,24 @@
-var assert = require('assert');
-var expect = require('chai').expect;
-var should = require('chai').should();
-var sinon = require('sinon')
+const assert = require('assert');
+const expect = require('chai').expect;
+const should = require('chai').should();
+const sinon = require('sinon')
+
+const knex = require("knex");
+const request = require('request');
+
+var fakeGoogleAPI = { createClient: (key )=> {
+  return {
+    geocode: function () {}
+  }
+}};
+
+var spy = sinon.spy();
+var mock = sinon.mock(fakeGoogleAPI);
+sinon.stub(knex, 'raw').resolves({});
+
+var closest = require('./index');
+
+
 
 var data = [
     {
@@ -63,3 +80,13 @@ it('should return false if invalid', function(){
       //assert.equal(isValid, false);
       isValid.should.equal(false);
 });
+
+describe('stubbed request', () => {
+  beforeEach(() => {
+    this.get = sinon.stub(request, 'get');
+  });
+
+  afterEach(() => {
+    request.get.restore();
+  });
+})
