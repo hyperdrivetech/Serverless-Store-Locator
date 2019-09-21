@@ -4,6 +4,10 @@
 This is a tabular dataset of the locations of every store of a major national retail chain. Basic implementation to load and run postgis queries using node and severless.
 The implementation can query the dataset and find the nearest store to a provided address or zip code
 
+## NOTICE: STATUS
+---
+took down the cloudsql instance so its not working but code works fine
+
 # setup gcloud
 [setup serverless](https://serverless.com/framework/docs/providers/google/guide/credentials#get-credentials--assign-roles)
 
