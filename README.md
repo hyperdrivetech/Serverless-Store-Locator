@@ -1,4 +1,4 @@
-# gcp-serverless-postgis-cloudfunction-example
+# Serverless Store Locator
 
 
 This is a tabular dataset of the locations of every store of a major national retail chain. Basic implementation to load and run postgis queries using node and severless.
